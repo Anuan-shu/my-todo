@@ -63,11 +63,13 @@ export default {
         loading.value = true
         
         const response = await api.post('/auth/login', form)
-        localStorage.setItem('token', response.data.token)
-        localStorage.setItem('username', response.data.username)
-        
-        ElMessage.success('登录成功')
-        router.push('/todos')
+        if (response.data.success) {
+          localStorage.setItem('username', response.data.username)
+          ElMessage.success('登录成功')
+          router.push('/todos')
+        } else {
+          ElMessage.error(response.data.message || '登录失败')
+        }
       } catch (error) {
         ElMessage.error(error.response?.data?.message || '登录失败')
       } finally {
@@ -80,11 +82,14 @@ export default {
         await loginForm.value.validate()
         loading.value = true
         
-        await api.post('/auth/register', form)
-        ElMessage.success('注册成功，请登录')
-        
-        // 注册成功后清空密码
-        form.password = ''
+        const response = await api.post('/auth/register', form)
+        if (response.data.success) {
+          ElMessage.success('注册成功，请登录')
+          // 注册成功后清空密码
+          form.password = ''
+        } else {
+          ElMessage.error(response.data.message || '注册失败')
+        }
       } catch (error) {
         ElMessage.error(error.response?.data?.message || '注册失败')
       } finally {

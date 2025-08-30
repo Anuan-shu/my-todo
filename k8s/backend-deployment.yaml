@@ -32,10 +32,8 @@ spec:
           value: "com.mysql.cj.jdbc.Driver"
         - name: SPRING_JPA_HIBERNATE_DDL_AUTO
           value: "update"
-        - name: JWT_SECRET
-          value: "myTodoSecretKey2024"
-        - name: JWT_EXPIRATION
-          value: "86400000"
+        - name: SERVER_SERVLET_SESSION_TIMEOUT
+          value: "30m"
         resources:
           requests:
             memory: "512Mi"

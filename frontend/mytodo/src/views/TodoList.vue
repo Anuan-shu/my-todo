@@ -15,7 +15,7 @@
         <!-- 筛选和添加 -->
         <div class="toolbar">
           <div class="filters">
-            <el-select v-model="statusFilter" placeholder="状态筛选" @change="loadTodos">
+            <el-select v-model="statusFilter" placeholder="状态筛选" @change="loadTodos" style="width: 150px">
               <el-option label="全部" value="ALL" />
               <el-option label="未完成" value="PENDING" />
               <el-option label="已完成" value="COMPLETED" />
@@ -29,7 +29,7 @@
         </div>
         
         <!-- Todo列表 -->
-        <el-table :data="todos" style="width: 100%" v-loading="loading">
+        <el-table :data="todos" style="width: 100%" v-loading="loading" stripe>
           <el-table-column prop="title" label="标题" min-width="200">
             <template #default="{ row }">
               <span :class="{ 'completed': row.status === 'COMPLETED' }">
@@ -45,6 +45,7 @@
               <el-tag v-if="row.deadline" :type="getDeadlineTagType(row.deadline)">
                 {{ formatDateTime(row.deadline) }}
               </el-tag>
+              <span v-else class="no-deadline">无截止时间</span>
             </template>
           </el-table-column>
           
@@ -63,17 +64,22 @@
                 :active-value="'COMPLETED'"
                 :inactive-value="'PENDING'"
                 @change="updateTodoStatus(row)"
+                active-text="已完成"
+                inactive-text="未完成"
               />
             </template>
           </el-table-column>
           
-          <el-table-column label="操作" width="150">
+          <el-table-column label="操作" width="150" fixed="right">
             <template #default="{ row }">
               <el-button size="small" @click="editTodo(row)">编辑</el-button>
               <el-button size="small" type="danger" @click="deleteTodo(row.id)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
+        
+        <!-- 空状态 -->
+        <el-empty v-if="todos.length === 0 && !loading" description="暂无任务" />
       </el-main>
     </el-container>
     
@@ -81,19 +87,20 @@
     <el-dialog
       v-model="showAddDialog"
       :title="editingTodo ? '编辑任务' : '添加任务'"
-      width="500px"
+      width="600px"
+      :close-on-click-modal="false"
     >
-      <el-form :model="todoForm" :rules="todoRules" ref="todoFormRef" label-width="80px">
-        <el-form-item label="标题" prop="title">
+      <el-form :model="todoForm" :rules="todoRules" ref="todoFormRef" label-width="100px">
+        <el-form-item label="任务标题" prop="title">
           <el-input v-model="todoForm.title" placeholder="请输入任务标题" />
         </el-form-item>
         
-        <el-form-item label="内容" prop="content">
+        <el-form-item label="任务内容" prop="content">
           <el-input
             v-model="todoForm.content"
             type="textarea"
-            :rows="3"
-            placeholder="请输入任务内容"
+            :rows="4"
+            placeholder="请输入任务内容（可选）"
           />
         </el-form-item>
         
@@ -101,18 +108,19 @@
           <el-date-picker
             v-model="todoForm.deadline"
             type="datetime"
-            placeholder="选择截止时间"
+            placeholder="选择截止时间（可选）"
             format="YYYY-MM-DD HH:mm"
             value-format="YYYY-MM-DD HH:mm:ss"
+            style="width: 100%"
           />
         </el-form-item>
         
         <el-form-item label="优先级" prop="priority">
-          <el-select v-model="todoForm.priority" placeholder="选择优先级">
-            <el-option label="低" value="LOW" />
-            <el-option label="中" value="MEDIUM" />
-            <el-option label="高" value="HIGH" />
-          </el-select>
+          <el-radio-group v-model="todoForm.priority">
+            <el-radio label="LOW">低</el-radio>
+            <el-radio label="MEDIUM">中</el-radio>
+            <el-radio label="HIGH">高</el-radio>
+          </el-radio-group>
         </el-form-item>
       </el-form>
       
@@ -156,7 +164,8 @@ export default {
     
     const todoRules = {
       title: [
-        { required: true, message: '请输入任务标题', trigger: 'blur' }
+        { required: true, message: '请输入任务标题', trigger: 'blur' },
+        { min: 1, max: 200, message: '标题长度在 1 到 200 个字符', trigger: 'blur' }
       ]
     }
     
@@ -267,10 +276,15 @@ export default {
       todoForm.priority = 'MEDIUM'
     }
     
-    const logout = () => {
-      localStorage.removeItem('token')
-      localStorage.removeItem('username')
-      router.push('/login')
+    const logout = async () => {
+      try {
+        await api.post('/auth/logout')
+        localStorage.removeItem('username')
+        router.push('/login')
+        ElMessage.success('退出成功')
+      } catch (error) {
+        ElMessage.error('退出失败')
+      }
     }
     
     const formatDateTime = (dateTime) => {
@@ -341,48 +355,118 @@ export default {
 <style scoped>
 .todo-container {
   min-height: 100vh;
+  background-color: #f5f7fa;
 }
 
 .el-header {
-  background: #409eff;
+  background: linear-gradient(135deg, #409eff 0%, #36a3f7 100%);
   color: white;
   line-height: 60px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 .header-content h1 {
   margin: 0;
+  font-size: 24px;
+  font-weight: 600;
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 15px;
+}
+
+.user-info span {
+  font-size: 14px;
+}
+
+.el-main {
+  padding: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
 .filters {
   display: flex;
-  gap: 10px;
+  gap: 15px;
+  align-items: center;
+}
+
+.el-table {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
 .completed {
   text-decoration: line-through;
-  color: #999;
+  color: #909399;
 }
 
-.el-main {
+.no-deadline {
+  color: #c0c4cc;
+  font-style: italic;
+}
+
+.el-dialog {
+  border-radius: 8px;
+}
+
+.el-dialog__header {
+  border-bottom: 1px solid #ebeef5;
+  padding: 20px 20px 15px;
+}
+
+.el-dialog__body {
   padding: 20px;
+}
+
+.el-dialog__footer {
+  border-top: 1px solid #ebeef5;
+  padding: 15px 20px 20px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .el-main {
+    padding: 15px;
+  }
+  
+  .toolbar {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  .user-info {
+    justify-content: center;
+  }
 }
 </style> 
