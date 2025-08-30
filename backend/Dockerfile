@@ -2,7 +2,7 @@ FROM openjdk:17-jdk-slim
 
 WORKDIR /app
 
-COPY target/mytodo-0.0.1-SNAPSHOT.jar app.jar
+COPY mytodo/target/mytodo-0.0.1-SNAPSHOT.jar app.jar
 
 EXPOSE 8080
 
