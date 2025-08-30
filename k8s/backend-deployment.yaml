@@ -32,8 +32,6 @@ spec:
           value: "com.mysql.cj.jdbc.Driver"
         - name: SPRING_JPA_HIBERNATE_DDL_AUTO
           value: "update"
-        - name: SERVER_SERVLET_SESSION_TIMEOUT
-          value: "30m"
         resources:
           requests:
             memory: "512Mi"

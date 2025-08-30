@@ -64,6 +64,7 @@ export default {
         
         const response = await api.post('/auth/login', form)
         if (response.data.success) {
+          localStorage.setItem('userId', response.data.userId)
           localStorage.setItem('username', response.data.username)
           ElMessage.success('登录成功')
           router.push('/todos')
@@ -84,6 +85,8 @@ export default {
         
         const response = await api.post('/auth/register', form)
         if (response.data.success) {
+          localStorage.setItem('userId', response.data.userId)
+          localStorage.setItem('username', response.data.username)
           ElMessage.success('注册成功，请登录')
           // 注册成功后清空密码
           form.password = ''

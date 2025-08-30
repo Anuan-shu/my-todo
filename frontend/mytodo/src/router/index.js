@@ -26,39 +26,13 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach(async (to, from, next) => {
-  if (to.meta.requiresAuth) {
-    try {
-      // 检查认证状态
-      const response = await fetch('http://localhost:8080/api/auth/check', {
-        credentials: 'include'
-      })
-      const data = await response.json()
-      
-      if (data.isLoggedIn) {
-        next()
-      } else {
-        next('/login')
-      }
-    } catch (error) {
-      next('/login')
-    }
-  } else if (to.path === '/login') {
-    // 如果已登录，重定向到任务列表
-    try {
-      const response = await fetch('http://localhost:8080/api/auth/check', {
-        credentials: 'include'
-      })
-      const data = await response.json()
-      
-      if (data.isLoggedIn) {
-        next('/todos')
-      } else {
-        next()
-      }
-    } catch (error) {
-      next()
-    }
+router.beforeEach((to, from, next) => {
+  const userId = localStorage.getItem('userId')
+  
+  if (to.meta.requiresAuth && !userId) {
+    next('/login')
+  } else if (to.path === '/login' && userId) {
+    next('/todos')
   } else {
     next()
   }

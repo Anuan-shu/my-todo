@@ -2,13 +2,12 @@ package com.hamza.mytodo.controller;
 
 import com.hamza.mytodo.dto.user.LoginRequest;
 import com.hamza.mytodo.dto.user.RegisterRequest;
+import com.hamza.mytodo.entity.User;
 import com.hamza.mytodo.service.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,18 +17,18 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
     
     @PostMapping("/register")
-    public ResponseEntity<Map<String, Object>> register(@RequestBody RegisterRequest request, HttpSession session) {
-        boolean success = authService.register(request.getUsername(), request.getPassword(), session);
+    public ResponseEntity<Map<String, Object>> register(@RequestBody RegisterRequest request) {
+        User user = authService.register(request.getUsername(), request.getPassword());
         
         Map<String, Object> response = new HashMap<>();
-        if (success) {
+        if (user != null) {
             response.put("success", true);
             response.put("message", "注册成功");
-            response.put("username", request.getUsername());
+            response.put("username", user.getUsername());
+            response.put("userId", user.getId());
         } else {
             response.put("success", false);
             response.put("message", "用户名已存在");
@@ -39,41 +38,18 @@ public class AuthController {
     }
     
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest request, HttpSession session) {
-        boolean success = authService.login(request.getUsername(), request.getPassword(), session);
+    public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest request) {
+        User user = authService.login(request.getUsername(), request.getPassword());
         
         Map<String, Object> response = new HashMap<>();
-        if (success) {
+        if (user != null) {
             response.put("success", true);
             response.put("message", "登录成功");
-            response.put("username", request.getUsername());
+            response.put("username", user.getUsername());
+            response.put("userId", user.getId());
         } else {
             response.put("success", false);
             response.put("message", "用户名或密码错误");
-        }
-        
-        return ResponseEntity.ok(response);
-    }
-    
-    @PostMapping("/logout")
-    public ResponseEntity<Map<String, Object>> logout(HttpSession session) {
-        authService.logout(session);
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("message", "退出成功");
-        
-        return ResponseEntity.ok(response);
-    }
-    
-    @GetMapping("/check")
-    public ResponseEntity<Map<String, Object>> checkAuth(HttpSession session) {
-        boolean isLoggedIn = authService.isLoggedIn(session);
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("isLoggedIn", isLoggedIn);
-        if (isLoggedIn) {
-            response.put("username", authService.getCurrentUsername(session));
         }
         
         return ResponseEntity.ok(response);

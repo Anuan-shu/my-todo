@@ -6,11 +6,9 @@ import com.hamza.mytodo.dto.todo.UpdateRequest;
 import com.hamza.mytodo.entity.Todo;
 import com.hamza.mytodo.service.TodoService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpSession;
 import java.util.List;
 
 @RestController
@@ -19,42 +17,41 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class TodoController {
 
-    @Autowired
-    private TodoService todoService;
+    private final TodoService todoService;
     
     @GetMapping
-    public ResponseEntity<List<Response>> getAllTodos(HttpSession session) {
-        List<Response> todos = todoService.getAllTodos(session);
+    public ResponseEntity<List<Response>> getAllTodos(@RequestHeader("X-User-ID") Long userId) {
+        List<Response> todos = todoService.getAllTodos(userId);
         return ResponseEntity.ok(todos);
     }
     
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<Response>> getTodosByStatus(@PathVariable Todo.TodoStatus status, HttpSession session) {
-        List<Response> todos = todoService.getTodosByStatus(status, session);
+    public ResponseEntity<List<Response>> getTodosByStatus(@PathVariable Todo.TodoStatus status, @RequestHeader("X-User-ID") Long userId) {
+        List<Response> todos = todoService.getTodosByStatus(status, userId);
         return ResponseEntity.ok(todos);
     }
     
     @PostMapping
-    public ResponseEntity<Response> createTodo(@RequestBody CreateRequest request, HttpSession session) {
-        Response todo = todoService.createTodo(request, session);
+    public ResponseEntity<Response> createTodo(@RequestBody CreateRequest request, @RequestHeader("X-User-ID") Long userId) {
+        Response todo = todoService.createTodo(request, userId);
         return ResponseEntity.ok(todo);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Response> updateTodo(@PathVariable Long id, @RequestBody UpdateRequest request, HttpSession session) {
-        Response todo = todoService.updateTodo(id, request, session);
+    public ResponseEntity<Response> updateTodo(@PathVariable Long id, @RequestBody UpdateRequest request, @RequestHeader("X-User-ID") Long userId) {
+        Response todo = todoService.updateTodo(id, request, userId);
         return ResponseEntity.ok(todo);
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTodo(@PathVariable Long id, HttpSession session) {
-        todoService.deleteTodo(id, session);
+    public ResponseEntity<Void> deleteTodo(@PathVariable Long id, @RequestHeader("X-User-ID") Long userId) {
+        todoService.deleteTodo(id, userId);
         return ResponseEntity.ok().build();
     }
     
     @GetMapping("/upcoming")
-    public ResponseEntity<List<Response>> getUpcomingTodos(HttpSession session) {
-        List<Response> todos = todoService.getUpcomingTodos(session);
+    public ResponseEntity<List<Response>> getUpcomingTodos(@RequestHeader("X-User-ID") Long userId) {
+        List<Response> todos = todoService.getUpcomingTodos(userId);
         return ResponseEntity.ok(todos);
     }
 } 

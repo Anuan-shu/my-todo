@@ -110,7 +110,7 @@
             type="datetime"
             placeholder="选择截止时间（可选）"
             format="YYYY-MM-DD HH:mm"
-            value-format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DDTHH:mm:ss"
             style="width: 100%"
           />
         </el-form-item>
@@ -232,7 +232,7 @@ export default {
       editingTodo.value = todo
       todoForm.title = todo.title
       todoForm.content = todo.content || ''
-      todoForm.deadline = todo.deadline ? dayjs(todo.deadline).format('YYYY-MM-DD HH:mm:ss') : ''
+      todoForm.deadline = todo.deadline
       todoForm.priority = todo.priority
       showAddDialog.value = true
     }
@@ -276,17 +276,13 @@ export default {
       todoForm.priority = 'MEDIUM'
     }
     
-    const logout = async () => {
-      try {
-        await api.post('/auth/logout')
-        localStorage.removeItem('username')
-        router.push('/login')
-        ElMessage.success('退出成功')
-      } catch (error) {
-        ElMessage.error('退出失败')
-      }
+    const logout = () => {
+      localStorage.removeItem('userId')
+      localStorage.removeItem('username')
+      router.push('/login')
+      ElMessage.success('退出成功')
     }
-    
+
     const formatDateTime = (dateTime) => {
       return dayjs(dateTime).format('MM-DD HH:mm')
     }

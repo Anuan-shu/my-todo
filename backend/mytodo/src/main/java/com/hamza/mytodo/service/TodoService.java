@@ -8,10 +8,8 @@ import com.hamza.mytodo.entity.User;
 import com.hamza.mytodo.repository.TodoRepository;
 import com.hamza.mytodo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,39 +18,20 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TodoService {
 
-    @Autowired
-    private TodoRepository todoRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private AuthService authService;
+    private final TodoRepository todoRepository;
+    private final UserRepository userRepository;
     
-    public List<Response> getAllTodos(HttpSession session) {
-        if (!authService.isLoggedIn(session)) {
-            throw new RuntimeException("未登录");
-        }
-        
-        Long userId = authService.getCurrentUserId(session);
+    public List<Response> getAllTodos(Long userId) {
         List<Todo> todos = todoRepository.findByUserIdOrderByPriorityDescCreatedAtDesc(userId);
         return todos.stream().map(this::convertToDto).collect(Collectors.toList());
     }
     
-    public List<Response> getTodosByStatus(Todo.TodoStatus status, HttpSession session) {
-        if (!authService.isLoggedIn(session)) {
-            throw new RuntimeException("未登录");
-        }
-        
-        Long userId = authService.getCurrentUserId(session);
+    public List<Response> getTodosByStatus(Todo.TodoStatus status, Long userId) {
         List<Todo> todos = todoRepository.findByUserIdAndStatusOrderByPriorityDescCreatedAtDesc(userId, status);
         return todos.stream().map(this::convertToDto).collect(Collectors.toList());
     }
     
-    public Response createTodo(CreateRequest request, HttpSession session) {
-        if (!authService.isLoggedIn(session)) {
-            throw new RuntimeException("未登录");
-        }
-        
-        Long userId = authService.getCurrentUserId(session);
+    public Response createTodo(CreateRequest request, Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("用户不存在"));
         
         Todo todo = new Todo();
@@ -66,12 +45,7 @@ public class TodoService {
         return convertToDto(savedTodo);
     }
     
-    public Response updateTodo(Long id, UpdateRequest request, HttpSession session) {
-        if (!authService.isLoggedIn(session)) {
-            throw new RuntimeException("未登录");
-        }
-        
-        Long userId = authService.getCurrentUserId(session);
+    public Response updateTodo(Long id, UpdateRequest request, Long userId) {
         Todo todo = todoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("任务不存在"));
         
@@ -89,12 +63,7 @@ public class TodoService {
         return convertToDto(updatedTodo);
     }
     
-    public void deleteTodo(Long id, HttpSession session) {
-        if (!authService.isLoggedIn(session)) {
-            throw new RuntimeException("未登录");
-        }
-        
-        Long userId = authService.getCurrentUserId(session);
+    public void deleteTodo(Long id, Long userId) {
         Todo todo = todoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("任务不存在"));
         
@@ -105,12 +74,7 @@ public class TodoService {
         todoRepository.delete(todo);
     }
     
-    public List<Response> getUpcomingTodos(HttpSession session) {
-        if (!authService.isLoggedIn(session)) {
-            throw new RuntimeException("未登录");
-        }
-        
-        Long userId = authService.getCurrentUserId(session);
+    public List<Response> getUpcomingTodos(Long userId) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime deadline = now.plusHours(24);
         
