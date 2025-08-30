@@ -1,8 +1,10 @@
 package com.hamza.mytodo.controller;
 
-import com.hamza.mytodo.dto.UserDto;
+import com.hamza.mytodo.dto.user.LoginRequest;
+import com.hamza.mytodo.dto.user.RegisterRequest;
 import com.hamza.mytodo.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,13 +15,14 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*", allowCredentials = "true")
+@CrossOrigin(origins = "*")
 public class AuthController {
-    
-    private final AuthService authService;
+
+    @Autowired
+    private AuthService authService;
     
     @PostMapping("/register")
-    public ResponseEntity<Map<String, Object>> register(@RequestBody UserDto.RegisterRequest request, HttpSession session) {
+    public ResponseEntity<Map<String, Object>> register(@RequestBody RegisterRequest request, HttpSession session) {
         boolean success = authService.register(request.getUsername(), request.getPassword(), session);
         
         Map<String, Object> response = new HashMap<>();
@@ -36,7 +39,7 @@ public class AuthController {
     }
     
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody UserDto.LoginRequest request, HttpSession session) {
+    public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest request, HttpSession session) {
         boolean success = authService.login(request.getUsername(), request.getPassword(), session);
         
         Map<String, Object> response = new HashMap<>();

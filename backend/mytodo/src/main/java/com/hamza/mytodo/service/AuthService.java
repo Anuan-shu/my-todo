@@ -3,6 +3,7 @@ package com.hamza.mytodo.service;
 import com.hamza.mytodo.entity.User;
 import com.hamza.mytodo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpSession;
@@ -11,8 +12,9 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    
-    private final UserRepository userRepository;
+
+    @Autowired
+    private UserRepository userRepository;
     
     public boolean login(String username, String password, HttpSession session) {
         Optional<User> userOpt = userRepository.findByUsername(username);

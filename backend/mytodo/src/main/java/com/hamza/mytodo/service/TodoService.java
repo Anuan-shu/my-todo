@@ -1,11 +1,14 @@
 package com.hamza.mytodo.service;
 
-import com.hamza.mytodo.dto.TodoDto;
+import com.hamza.mytodo.dto.todo.CreateRequest;
+import com.hamza.mytodo.dto.todo.Response;
+import com.hamza.mytodo.dto.todo.UpdateRequest;
 import com.hamza.mytodo.entity.Todo;
 import com.hamza.mytodo.entity.User;
 import com.hamza.mytodo.repository.TodoRepository;
 import com.hamza.mytodo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpSession;
@@ -16,12 +19,15 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class TodoService {
+
+    @Autowired
+    private TodoRepository todoRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private AuthService authService;
     
-    private final TodoRepository todoRepository;
-    private final UserRepository userRepository;
-    private final AuthService authService;
-    
-    public List<TodoDto.Response> getAllTodos(HttpSession session) {
+    public List<Response> getAllTodos(HttpSession session) {
         if (!authService.isLoggedIn(session)) {
             throw new RuntimeException("未登录");
         }
@@ -31,7 +37,7 @@ public class TodoService {
         return todos.stream().map(this::convertToDto).collect(Collectors.toList());
     }
     
-    public List<TodoDto.Response> getTodosByStatus(Todo.TodoStatus status, HttpSession session) {
+    public List<Response> getTodosByStatus(Todo.TodoStatus status, HttpSession session) {
         if (!authService.isLoggedIn(session)) {
             throw new RuntimeException("未登录");
         }
@@ -41,7 +47,7 @@ public class TodoService {
         return todos.stream().map(this::convertToDto).collect(Collectors.toList());
     }
     
-    public TodoDto.Response createTodo(TodoDto.CreateRequest request, HttpSession session) {
+    public Response createTodo(CreateRequest request, HttpSession session) {
         if (!authService.isLoggedIn(session)) {
             throw new RuntimeException("未登录");
         }
@@ -60,7 +66,7 @@ public class TodoService {
         return convertToDto(savedTodo);
     }
     
-    public TodoDto.Response updateTodo(Long id, TodoDto.UpdateRequest request, HttpSession session) {
+    public Response updateTodo(Long id, UpdateRequest request, HttpSession session) {
         if (!authService.isLoggedIn(session)) {
             throw new RuntimeException("未登录");
         }
@@ -99,7 +105,7 @@ public class TodoService {
         todoRepository.delete(todo);
     }
     
-    public List<TodoDto.Response> getUpcomingTodos(HttpSession session) {
+    public List<Response> getUpcomingTodos(HttpSession session) {
         if (!authService.isLoggedIn(session)) {
             throw new RuntimeException("未登录");
         }
@@ -112,8 +118,8 @@ public class TodoService {
         return todos.stream().map(this::convertToDto).collect(Collectors.toList());
     }
     
-    private TodoDto.Response convertToDto(Todo todo) {
-        TodoDto.Response dto = new TodoDto.Response();
+    private Response convertToDto(Todo todo) {
+        Response dto = new Response();
         dto.setId(todo.getId());
         dto.setTitle(todo.getTitle());
         dto.setContent(todo.getContent());

@@ -1,9 +1,12 @@
 package com.hamza.mytodo.controller;
 
-import com.hamza.mytodo.dto.TodoDto;
+import com.hamza.mytodo.dto.todo.CreateRequest;
+import com.hamza.mytodo.dto.todo.Response;
+import com.hamza.mytodo.dto.todo.UpdateRequest;
 import com.hamza.mytodo.entity.Todo;
 import com.hamza.mytodo.service.TodoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,32 +16,33 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/todos")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*", allowCredentials = "true")
+@CrossOrigin(origins = "*")
 public class TodoController {
-    
-    private final TodoService todoService;
+
+    @Autowired
+    private TodoService todoService;
     
     @GetMapping
-    public ResponseEntity<List<TodoDto.Response>> getAllTodos(HttpSession session) {
-        List<TodoDto.Response> todos = todoService.getAllTodos(session);
+    public ResponseEntity<List<Response>> getAllTodos(HttpSession session) {
+        List<Response> todos = todoService.getAllTodos(session);
         return ResponseEntity.ok(todos);
     }
     
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<TodoDto.Response>> getTodosByStatus(@PathVariable Todo.TodoStatus status, HttpSession session) {
-        List<TodoDto.Response> todos = todoService.getTodosByStatus(status, session);
+    public ResponseEntity<List<Response>> getTodosByStatus(@PathVariable Todo.TodoStatus status, HttpSession session) {
+        List<Response> todos = todoService.getTodosByStatus(status, session);
         return ResponseEntity.ok(todos);
     }
     
     @PostMapping
-    public ResponseEntity<TodoDto.Response> createTodo(@RequestBody TodoDto.CreateRequest request, HttpSession session) {
-        TodoDto.Response todo = todoService.createTodo(request, session);
+    public ResponseEntity<Response> createTodo(@RequestBody CreateRequest request, HttpSession session) {
+        Response todo = todoService.createTodo(request, session);
         return ResponseEntity.ok(todo);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<TodoDto.Response> updateTodo(@PathVariable Long id, @RequestBody TodoDto.UpdateRequest request, HttpSession session) {
-        TodoDto.Response todo = todoService.updateTodo(id, request, session);
+    public ResponseEntity<Response> updateTodo(@PathVariable Long id, @RequestBody UpdateRequest request, HttpSession session) {
+        Response todo = todoService.updateTodo(id, request, session);
         return ResponseEntity.ok(todo);
     }
     
@@ -49,8 +53,8 @@ public class TodoController {
     }
     
     @GetMapping("/upcoming")
-    public ResponseEntity<List<TodoDto.Response>> getUpcomingTodos(HttpSession session) {
-        List<TodoDto.Response> todos = todoService.getUpcomingTodos(session);
+    public ResponseEntity<List<Response>> getUpcomingTodos(HttpSession session) {
+        List<Response> todos = todoService.getUpcomingTodos(session);
         return ResponseEntity.ok(todos);
     }
 } 
