@@ -16,22 +16,23 @@ spec:
       containers:
       - name: todo-backend
         image: todo-backend:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
         env:
-        - name: SPRING_DATASOURCE_URL
-          value: "jdbc:mysql://mysql:3306/todo_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
-        - name: SPRING_DATASOURCE_USERNAME
+        - name: DATABASE_HOST
+          value: todo-database
+        - name: DATABASE_PORT
+          value: "3306"
+        - name: DATABASE_NAME
+          value: "todo_db"
+        - name: DATABASE_USERNAME
           value: "todo_user"
-        - name: SPRING_DATASOURCE_PASSWORD
+        - name: DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
               name: mysql-secret
               key: password
-        - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
-          value: "com.mysql.cj.jdbc.Driver"
-        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
-          value: "update"
         resources:
           requests:
             memory: "512Mi"

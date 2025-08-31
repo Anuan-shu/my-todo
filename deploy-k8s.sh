@@ -10,12 +10,11 @@ kubectl apply -f k8s/namespace.yaml
 echo "部署MySQL..."
 kubectl apply -f k8s/mysql-secret.yaml
 kubectl apply -f k8s/mysql-configmap.yaml
-kubectl apply -f k8s/mysql-init-script.yaml
 kubectl apply -f k8s/mysql-deployment.yaml
 
 # 等待MySQL就绪
 echo "等待MySQL就绪..."
-kubectl wait --for=condition=ready pod -l app=mysql -n todo-app --timeout=300s
+kubectl wait --for=condition=ready pod -l app=todo-database -n todo-app --timeout=300s
 
 # 部署后端
 echo "部署后端服务..."
@@ -33,4 +32,3 @@ kubectl wait --for=condition=ready pod -l app=todo-frontend -n todo-app --timeou
 echo "部署完成！"
 echo "查看服务状态：kubectl get all -n todo-app"
 echo "查看Pod日志：kubectl logs -f deployment/todo-backend -n todo-app"
-echo "端口转发：kubectl port-forward service/todo-frontend 8080:80 -n todo-app" 

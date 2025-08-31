@@ -1,21 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mysql
+  name: todo-database
   namespace: todo-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mysql
+      app: todo-database
   template:
     metadata:
       labels:
-        app: mysql
+        app: todo-database
     spec:
       containers:
-      - name: mysql
-        image: mysql:8.0
+      - name: todo-database
+        image: todo-database:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3306
         env:
@@ -38,8 +39,6 @@ spec:
           mountPath: /etc/mysql/conf.d
         - name: mysql-data
           mountPath: /var/lib/mysql
-        - name: init-script
-          mountPath: /docker-entrypoint-initdb.d
       volumes:
       - name: mysql-config
         configMap:
@@ -47,18 +46,15 @@ spec:
       - name: mysql-data
         persistentVolumeClaim:
           claimName: mysql-pvc
-      - name: init-script
-        configMap:
-          name: mysql-init-script
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mysql
+  name: todo-database
   namespace: todo-app
 spec:
   selector:
-    app: mysql
+    app: todo-database
   ports:
   - port: 3306
     targetPort: 3306

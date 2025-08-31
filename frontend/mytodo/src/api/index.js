@@ -1,6 +1,10 @@
 import axios from 'axios'
 
-const API_BASE_URL = 'http://localhost:8080/api'
+// 根据环境判断API基础路径
+const isDevelopment = process.env.NODE_ENV === 'development' || import.meta.env.DEV
+const API_BASE_URL = isDevelopment 
+  ? 'http://localhost:8080/api' 
+  : '/api'
 
 const api = axios.create({
   baseURL: API_BASE_URL,

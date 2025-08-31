@@ -16,6 +16,7 @@ spec:
       containers:
       - name: todo-frontend
         image: todo-frontend:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
         resources:
@@ -50,26 +51,3 @@ spec:
   - port: 80
     targetPort: 80
   type: ClusterIP
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: todo-frontend-ingress
-  namespace: todo-app
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
-    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
-    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
-spec:
-  rules:
-  - host: todo.local
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: todo-frontend
-            port:
-              number: 80 
