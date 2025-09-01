@@ -2,6 +2,10 @@
 
 这是一个基于SpringBoot + Vue的Todo应用，支持部署到Kubernetes集群中。
 
+![登录页面](images/login-page.png)
+
+![主页面](images/home-page.png)
+
 ## 功能特性
 
 ### 1. 任务增删改查（基础核心）
