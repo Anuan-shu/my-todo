@@ -73,7 +73,7 @@ mysql -h localhost -P 3306 -u root -prootpassword < database/init.sql
 #### 2. 启动后端服务
 ```bash
 cd backend/mytodo
-mvn clean install
+mvn clean dependency:resolve
 mvn spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=dev"
 ```
 
@@ -91,30 +91,46 @@ npm run dev
 
 ## 部署到Kubernetes
 
-### 1. 构建Docker镜像
+### 1. 安装依赖
+确保安装项目所需的依赖
+```bash
+cd backend/mytodo
+mvn clean dependency:resolve
+cd ../../
+cd frontend/mytodo
+npm install
+cd ../../
+```
+
+### 2. 构建Docker镜像
 由于要构建镜像，请保证网络畅通✈️
 ```bash
 chmod +x build-images.sh
 bash ./build-images.sh
 ```
 
-### 2. 部署到K8s
+### 3. 部署到K8s
 ```bash
 # 确保kubectl已配置
 chmod +x deploy.sh
 bash ./deploy-k8s.sh
 ```
 
-### 3. 访问应用
+### 4. 访问应用
 ```txt
 访问 http://localhost:30080
 ```
 
-### 4. 从k8s中删除应用
+### 5. 从k8s中删除应用
 ```bash
 chmod +x uninstall-k8s.sh
 bash ./uninstall-k8s.sh
 ```
+
+## 自动构建/部署
+如果使用jenkins进行自动构建/部署有困难，推荐使用GitHub Actions，参考`.github/workflows`目录下的配置文件。
+
+该项目使用本地Runner进行自动构建/部署，请点击仓库的Settings -> Actions -> Runners，按照提示安装Runner。
 
 ## 许可证
 
