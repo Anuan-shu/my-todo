@@ -127,10 +127,69 @@ chmod +x uninstall-k8s.sh
 bash ./uninstall-k8s.sh
 ```
 
-## 自动构建/部署
-如果使用jenkins进行自动构建/部署有困难，推荐使用GitHub Actions，参考`.github/workflows`目录下的配置文件。
+## CI/CD流水线
+如果使用jenkins进行CI/CD有困难，推荐使用GitHub Actions，参考`.github/workflows`目录下的配置文件。
 
-该项目使用本地Runner进行自动构建/部署，请点击仓库的Settings -> Actions -> Runners，按照提示安装Runner。
+该项目使用本地Runner实现自动化流水线，如需要查看CI/CD的效果，请fork本仓库，然后点击仓库的Settings -> Actions -> Runners，按照提示安装Runner。
+
+## 项目关键点说明
+
+### 1. docker环境和k8s环境搭建
+
+- 推荐使用`Docker Desktop`，提供内置的k8s功能，适合本地开发和测试
+![Docker Desktop启用k8s](images/docker.png)
+
+- 也可以使用`minikube`，可以快速的创建一个单节点集群，见[Minikube官方文档](https://minikube.sigs.k8s.io/docs/start/)
+
+- 使用云厂商提供的k8s服务，如阿里云的ACK，腾讯云的TKE等
+
+### 2. 项目如何容器化
+
+容器化的重点是分离配置以及编写Dockerfile，下面以springboot项目和vue项目为例
+
+对于springboot项目，要改写[application.properties](backend/mytodo/src/main/resources/application.properties)项目配置文件，改为使用环境变量配置数据库连接等信息，对于前端，要改写`axios`的请求地址，改为请求后端服务的域名，见[index.js](frontend/mytodo/src/api/index.js)
+
+```js
+// 根据环境判断API基础路径
+const isDevelopment = process.env.NODE_ENV === 'development' || import.meta.env.DEV
+const API_BASE_URL = isDevelopment 
+  ? 'http://localhost:8080/api' 
+  : '/api'
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000
+})
+```
+
+这个地方路径之所以是`/api`，是因为我们使用了`nginx`作为前端的反向代理服务器，见[nginx.conf](frontend/nginx.conf)，会将`http://localhost:30080/api/**`开头的请求转发到后端服务地址`http://todo-backend:8080/**`，其中`todo-backend`是k8s中后端服务的名称
+
+然后是编写Dockerfile文件，这部分比较简单，见[backend/Dockerfile](backend/Dockerfile)和[frontend/Dockerfile](frontend/Dockerfile)
+
+### 3. 项目如何部署到k8s
+
+部署到k8s的重点是编写k8s的配置文件，见[k8s](k8s)目录下的配置文件，主要包括以下资源：
+- 部署描述文件：[deployment.yaml](k8s/mysql-deployment.yaml)
+- 配置文件：[configmap.yaml](k8s/mysql-configmap.yaml)
+- 密钥文件：[secret.yaml](k8s/mysql-secret.yaml)
+
+主要是指定服务的名称、使用的镜像、端口、环境变量等信息，需要注意的是服务的端口以及类型，见[k8s 四种Service类型](https://blog.csdn.net/weixin_53269650/article/details/140924623)，由于我们是本地开发测试，所以使用`NodePort`类型，可以通过`localhost:30080`访问前端服务，而后端和数据库服务一般不暴露给用户，所以使用`ClusterIP`类型，只在集群内部可见
+
+### 4. 搭建CI/CD流水线
+
+可以使用`GitHub Actions`，`Jenkins`等工具搭建CI/CD流水线，本项目使用`GitHub Actions`，见[.github/workflows](.github/workflows)目录下的配置文件
+
+如何安装自己的`GitHub Actions Runner`?
+
+![GitHub Actions Runner](images/action-runner.png)
+
+在项目设置页面点击`Actions`，然后点击`Runners`，点击`New self-hosted runner`，按照提示安装Runner
+
+![安装Runner](images/add-runner.png)
+
+## 写在最后
+
+有任何问题都可以询问助教，但是助教也不保证全都会，相信你们biubiubiu的创造力🥳
 
 ## 许可证
 
