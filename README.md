@@ -157,7 +157,7 @@ bash ./uninstall-k8s.sh
 // 根据环境判断API基础路径
 const isDevelopment = process.env.NODE_ENV === 'development' || import.meta.env.DEV
 const API_BASE_URL = isDevelopment 
-  ? 'http://localhost:8080/api' 
+  ? 'http://localhost:8080/' 
   : '/api'
 
 const api = axios.create({
