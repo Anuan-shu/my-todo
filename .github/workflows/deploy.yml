@@ -46,20 +46,6 @@ jobs:
         working-directory: ./frontend/mytodo
         run: npm run build
 
-      - name: 构建Docker镜像
-        run: |
-          docker rmi todo-backend:latest
-          docker rmi todo-frontend:latest
-          docker rmi todo-database:latest
-          # 构建后端镜像
-          docker build -t todo-backend:latest -f backend/Dockerfile backend --load
-          
-          # 构建前端镜像
-          docker build -t todo-frontend:latest -f frontend/Dockerfile frontend --load
-          
-          # 构建数据库镜像
-          docker build -t todo-database:latest -f database/Dockerfile database --load
-
       - name: 卸载现有应用
         run: |
           echo "卸载现有Todo应用..."
@@ -84,6 +70,20 @@ jobs:
           kubectl wait --for=delete namespace/todo-app --timeout=300s 2>/dev/null || true
           
           echo "卸载完成，开始重新部署..."
+
+      - name: 构建Docker镜像
+        run: |
+          docker rmi todo-backend:latest
+          docker rmi todo-frontend:latest
+          docker rmi todo-database:latest
+          # 构建后端镜像
+          docker build -t todo-backend:latest -f backend/Dockerfile backend --load
+          
+          # 构建前端镜像
+          docker build -t todo-frontend:latest -f frontend/Dockerfile frontend --load
+          
+          # 构建数据库镜像
+          docker build -t todo-database:latest -f database/Dockerfile database --load
 
       - name: 部署到Kubernetes
         run: |
